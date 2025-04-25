@@ -1,0 +1,24 @@
+.c-menu {
+    background-color: #1a1a1a;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+    border-bottom: 4px solid #FFD700; /* dorado Hogwarts */
+    font-family: 'Garamond', serif; /* estilo mágico */
+  }
+  
+  .c-menu a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .c-menu a:hover {
+    background-color: #FFD700;
+    color: #1a1a1a;
+    transform: scale(1.05);
+    font-weight: bold;
+  }
+  
