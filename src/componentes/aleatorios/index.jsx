@@ -1,57 +1,58 @@
-import { useEffect, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { AppContext } from '../../contexto/contexto';
+import { useEffect, useState } from "react";
 
 function Aleatorios() {
-  const { data, listaCapturados, setListaCapturados, setTipoSeleccionado } = useContext(AppContext);
-  const [aleatorio, setAleatorio] = useState([]);
-
-  const navigate = useNavigate();
-
-  setTipoSeleccionado("All");
+  const [personajes, setPersonajes] = useState([]);
+  const [aleatorios, setAleatorios] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (data.length > 0) {
-      generar();
+    async function fetchPersonajes() {
+      try {
+        const res = await fetch("https://hp-api.onrender.com/api/characters");
+        if (!res.ok) throw new Error("Error al obtener personajes");
+        const data = await res.json();
+        setPersonajes(data);
+        generarAleatorios(data);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setCargando(false);
+      }
     }
-  }, [data]);
+    fetchPersonajes();
+  }, []);
 
-  const generar = () => {
-    let nuevosAleatorios = [];
-
-    while (nuevosAleatorios.length < 4) {
-      const index = Math.floor(Math.random() * data.length);
-      nuevosAleatorios.push(data[index]);
+  const generarAleatorios = (lista) => {
+    const seleccionados = [];
+    const max = lista.length;
+    while (seleccionados.length < 5 && seleccionados.length < max) {
+      const indice = Math.floor(Math.random() * max);
+      const personaje = lista[indice];
+      if (!seleccionados.includes(personaje)) {
+        seleccionados.push(personaje);
+      }
     }
-    setAleatorio(nuevosAleatorios);
-
-    const nuevosIds = nuevosAleatorios.map((personaje) => personaje.name)
-      .filter(name => !listaCapturados.includes(name));
-      
-    setListaCapturados(prev => [...prev, ...nuevosIds]);
+    setAleatorios(seleccionados);
   };
 
+  if (cargando) return <p>Cargando personajes...</p>;
+  if (error) return <p>Error: {error}</p>;
+
   return (
-    <section className="c-aleatorio c-lista">
-      {aleatorio.map((personaje, index) => (
-        <div className="c-lista-pokemon c-un_aleatorio"
-          key={index}
-          onClick={() => navigate(`/detalle/${encodeURIComponent(personaje.name)}`)}
-        >
-          <p>{personaje.name}</p>
-          {personaje.image && (
-            <img
-              src={personaje.image}
-              alt={`Personaje ${personaje.name}`}
-              width="60"
-              height="60"
-            />
-          )}
-          <p>{personaje.house || "Sin casa"}</p>
-        </div>
-      ))}
-      <button onClick={generar}>Generar</button>
-    </section>
+    <div>
+      <h2>Personajes Aleatorios de Harry Potter</h2>
+      <button onClick={() => generarAleatorios(personajes)}>Generar nuevos</button>
+      <ul>
+        {aleatorios.map((p) => (
+          <li key={p.name} style={{ marginBottom: "1rem" }}>
+            <strong>{p.name}</strong> - {p.house || "Sin casa"}
+            <br />
+            {p.image && <img src={p.image} alt={p.name} width={100} />}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

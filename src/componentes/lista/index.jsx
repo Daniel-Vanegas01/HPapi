@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { AppContext } from '../../contexto/contexto';
 import { useNavigate } from "react-router-dom";
 import './style.css';
@@ -7,26 +7,34 @@ import Filtro from '../filtro';
 function Lista() {
   const navigate = useNavigate();
   const [busqueda, setBusqueda] = useState('');
-
-  const { data, tipoSeleccionado, setTipoSeleccionado } = useContext(AppContext);
+  const { 
+    data, setData, casaSeleccionada, setCasaSeleccionada,
+    favoritos, agregarAFavoritos, eliminarDeFavoritos
+  } = useContext(AppContext);
 
   const handleCasaChange = (casa) => {
-    setTipoSeleccionado(casa);
+    setCasaSeleccionada(casa);
   };
 
-  // Filtro por búsqueda
-  let resultados = data;
+  useEffect(() => {
+    const fetchPersonajes = async () => {
+      const res = await fetch('https://hp-api.onrender.com/api/characters');
+      const personajes = await res.json();
+      setData(personajes);
+    };
+    fetchPersonajes();
+  }, [setData]);
 
-  if (busqueda.length >= 3) {
-    resultados = resultados.filter(personaje =>
-      personaje.name.toLowerCase().includes(busqueda.toLowerCase())
-    );
+  // Filtrar según la casa seleccionada
+  let resultados = data;
+  if (casaSeleccionada && casaSeleccionada !== 'All') {
+    resultados = resultados.filter(p => p.house === casaSeleccionada);
   }
 
-  // Filtro por casa
-  if (tipoSeleccionado !== "All") {
-    resultados = resultados.filter(personaje =>
-      (personaje.house || "unknown") === tipoSeleccionado
+  // Filtrar según la búsqueda (mínimo 3 caracteres)
+  if (busqueda.length >= 3) {
+    resultados = resultados.filter(p =>
+      p.name.toLowerCase().includes(busqueda.toLowerCase())
     );
   }
 
@@ -39,29 +47,42 @@ function Lista() {
         onChange={(e) => setBusqueda(e.target.value)}
         className="c-buscador"
       />
-
       <Filtro onCasaChange={handleCasaChange} />
-
       <section className='c-lista'>
-        {resultados.map((personaje, index) => (
-          <div
-            className={`c-lista-pokemon hp-house-${personaje.house || 'unknown'}`}
-            onClick={() => navigate(`/detalle/${encodeURIComponent(personaje.name)}`)}
-            key={index}
-          >
-            {personaje.image && (
+        {resultados.map((personaje, index) => {
+          const esFavorito = favoritos.some(fav => fav.name === personaje.name);
+
+          return (
+            <div
+              className='c-lista-pokemon'
+              key={index}
+            >
               <img
-                src={personaje.image}
+                src={personaje.image || 'https://via.placeholder.com/60x60?text=No+Image'}
                 alt={`Personaje ${personaje.name}`}
                 width='auto'
                 height='60'
                 loading='lazy'
+                onClick={() => navigate(`/detalle/${encodeURIComponent(personaje.name)}`)}
+                style={{ cursor: 'pointer' }}
               />
-            )}
-            <p>{personaje.name}</p>
-            {personaje.house && <small>{personaje.house}</small>}
-          </div>
-        ))}
+              <p onClick={() => navigate(`/detalle/${encodeURIComponent(personaje.name)}`)} style={{ cursor: 'pointer' }}>
+                {personaje.name}
+              </p>
+              <p>{personaje.house || 'Sin casa'}</p>
+
+              {esFavorito ? (
+                <button onClick={() => eliminarDeFavoritos(personaje)}>
+                  Quitar de Favoritos
+                </button>
+              ) : (
+                <button onClick={() => agregarAFavoritos(personaje)}>
+                  Agregar a Favoritos
+                </button>
+              )}
+            </div>
+          );
+        })}
       </section>
     </>
   );

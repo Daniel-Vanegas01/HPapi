@@ -1,39 +1,32 @@
-import { useContext } from 'react';
-import { AppContext } from '../../contexto/contexto';
-import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AppContext } from "../../contexto/contexto";
 
-function Favoritos() {
-  const { favoritos } = useContext(AppContext);
-  const navigate = useNavigate();
+export default function Favoritos() {
+  const { favoritos, setFavoritos } = useContext(AppContext);
+
+  const handleEliminarFavorito = (id) => {
+    const nuevosFavoritos = favoritos.filter((personaje) => personaje.id !== id);
+    setFavoritos(nuevosFavoritos);
+  };
+
+  if (favoritos.length === 0) {
+    return <p>No tienes personajes favoritos aún.</p>;
+  }
 
   return (
-    <>
-      {favoritos.length === 0 ? (
-        <p>No hay personajes favoritos aún.</p>
-      ) : (
-        <div className='c-lista'>
-          {favoritos.map((personaje, index) => (
-            <div 
-              className={`c-lista-pokemon hp-house-${personaje.house || 'unknown'}`}
-              onClick={() => navigate(`/detalle/${encodeURIComponent(personaje.name)}`)}
-              key={index}
-            >
-              {personaje.image && (
-                <img 
-                  src={personaje.image} 
-                  alt={`Personaje ${personaje.name}`} 
-                  width='auto' 
-                  height='60' 
-                  loading='lazy'
-                />
-              )}
-              <p>{personaje.name}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </>
+    <section>
+      <h2>Personajes Favoritos</h2>
+      <ul>
+        {favoritos.map((personaje) => (
+          <li key={personaje.id} style={{ marginBottom: "1rem" }}>
+            <p><strong>Nombre:</strong> {personaje.name}</p>
+            <p><strong>Casa:</strong> {personaje.house || "Desconocida"}</p>
+            <button onClick={() => handleEliminarFavorito(personaje.id)}>
+              Eliminar de favoritos
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
-
-export default Favoritos;

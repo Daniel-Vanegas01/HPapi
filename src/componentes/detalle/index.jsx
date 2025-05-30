@@ -1,54 +1,58 @@
-import { useState, useEffect, useContext } from 'react'
-import { useParams } from "react-router-dom"; 
-import { AppContext } from '../../contexto/contexto';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 function Detalle() {
-
-  const { name } = useParams(); 
+  const { name } = useParams();
   const [personaje, setPersonaje] = useState(null);
-  const { favoritos, setFavoritos } = useContext(AppContext);
-  const esFavorito = favoritos.some(p => p.name === personaje?.name);
+  const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    fetch(`https://hp-api.onrender.com/api/characters`)
-      .then(response => response.json())
-      .then(data => {
-        const encontrado = data.find(p => p.name.toLowerCase() === decodeURIComponent(name).toLowerCase());
-        setPersonaje(encontrado);
-      })
-      .catch(error => console.error("Error:", error));
-  }, [name]); 
-
-  const toggleFavorito = () => {
-    if (esFavorito) {
-      setFavoritos(favoritos.filter(p => p.name !== personaje.name));
-    } else {
-      setFavoritos([...favoritos, { name: personaje.name }]);
+    async function fetchPersonaje() {
+      setCargando(true);
+      try {
+        const res = await fetch("https://hp-api.onrender.com/api/characters");
+        const data = await res.json();
+        // Buscar personaje por nombre exacto (case-insensitive)
+        const encontrado = data.find(
+          (p) => p.name.toLowerCase() === name.toLowerCase()
+        );
+        setPersonaje(encontrado || null);
+      } catch (error) {
+        console.error("Error cargando personaje:", error);
+        setPersonaje(null);
+      } finally {
+        setCargando(false);
+      }
     }
-  };
 
-  if (!personaje) return <p>Cargando...</p>;
+    fetchPersonaje();
+  }, [name]);
+
+  if (cargando) return <p>Cargando personaje...</p>;
+
+  if (!personaje) return <p>Personaje no encontrado.</p>;
 
   return (
-    <div className="detalle-personaje">
-      {personaje.image && (
-        <img 
-          src={personaje.image} 
-          alt={personaje.name} 
-          width="200"
-        />
-      )}
-
+    <div>
       <h2>{personaje.name}</h2>
-
-      {personaje.house && <p>Casa: {personaje.house}</p>}
-      {personaje.ancestry && <p>Linaje: {personaje.ancestry}</p>}
-      {personaje.wand && personaje.wand.wood && <p>Varita: {personaje.wand.wood} con núcleo de {personaje.wand.core}</p>}
-      {personaje.patronus && <p>Patronus: {personaje.patronus}</p>}
-
-      <button onClick={toggleFavorito}>
-        {esFavorito ? '❤️' : '🤍'}
-      </button>
+      <img
+        src={personaje.image || "https://via.placeholder.com/200"}
+        alt={personaje.name}
+        width="200"
+        height="auto"
+      />
+      <p><strong>Casa:</strong> {personaje.house || "Desconocida"}</p>
+      <p><strong>Especie:</strong> {personaje.species || "Desconocida"}</p>
+      <p><strong>Género:</strong> {personaje.gender || "Desconocido"}</p>
+      <p><strong>Patronus:</strong> {personaje.patronus || "Desconocido"}</p>
+      <p><strong>Actor:</strong> {personaje.actor || "Desconocido"}</p>
+      <p><strong>Varita:</strong></p>
+      <ul>
+        <li><strong>Madera:</strong> {personaje.wand?.wood || "Desconocida"}</li>
+        <li><strong>Core:</strong> {personaje.wand?.core || "Desconocido"}</li>
+        <li><strong>Longitud:</strong> {personaje.wand?.length ? `${personaje.wand.length} pulgadas` : "Desconocida"}</li>
+      </ul>
+      <p><strong>Estado de muerte:</strong> {personaje.alive ? "Vivo" : "Muerto"}</p>
     </div>
   );
 }

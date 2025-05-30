@@ -3,15 +3,19 @@ function Filtro({ onCasaChange }) {
     "All",
     "Gryffindor",
     "Slytherin",
-    "Ravenclaw",
     "Hufflepuff",
-    "unknown"
+    "Ravenclaw",
+    "Other"
   ];
 
   return (
     <div className="c-filtro">
       {casas.map((casa, index) => (
-        <button key={index} onClick={() => onCasaChange(casa)}>
+        <button
+          key={index}
+          onClick={() => onCasaChange(casa)}
+          className=""
+        >
           {casa}
         </button>
       ))}
