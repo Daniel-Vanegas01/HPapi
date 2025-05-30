@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import './style.css';
+
 
 function Aleatorios() {
   const [personajes, setPersonajes] = useState([]);

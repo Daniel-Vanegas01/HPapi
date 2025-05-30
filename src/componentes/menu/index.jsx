@@ -8,6 +8,7 @@ function Menu() {
           <Link to="/favoritos">Favoritos</Link>
           <Link to="/aleatorios">Aleatorio</Link>
           <Link to="/usuarios">Usuarios</Link>
+          <Link to="/perfil">Perfil</Link>
         </nav>
     );
 }

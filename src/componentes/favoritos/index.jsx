@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { AppContext } from "../../contexto/contexto";
+import './style.css';
 
 export default function Favoritos() {
   const { favoritos, setFavoritos } = useContext(AppContext);

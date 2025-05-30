@@ -14,6 +14,7 @@ import Login from './componentes/login';
 import Registro from './componentes/registro';
 import Administrador from './componentes/administrador';
 import Verificado from './componentes/verificado';
+import Perfil from './componentes/perfil';
 
 function App() {
   const [usuario, setUsuario] = useState(null);
@@ -48,6 +49,7 @@ function App() {
           <Route path="/capturados" element={usuario ? <Capturados /> : <Navigate to="/login" />} />
           <Route path="/favoritos" element={usuario ? <Favoritos /> : <Navigate to="/login" />} />
           <Route path="/detalle/:name" element={usuario ? <Detalle /> : <Navigate to="/login" />} />
+          <Route path="/perfil" element={usuario ? <Perfil /> : <Navigate to="/login" />} />
 
           <Route path="/login" element={<Login />} />
           <Route path="/registro" element={<Registro />} />
